@@ -1,4 +1,4 @@
-import 'package:arduino/pages/home_screen.dart';
+import 'package:arduino/pages/splash_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -12,11 +12,59 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Voltrix Tech',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: const ColorScheme.light(
+          // Primary colors from Arduino logo
+          primary: Color(0xFF1B2951), // Dark navy blue
+          secondary: Color(0xFF00A8CC), // Bright teal/cyan
+          tertiary: Color(0xFF00C896), // Emerald green
+          // Surface colors
+          surface: Color(0xFFF8F9FA),
+          onSurface: Color(0xFF1B2951),
+
+          // Background colors
+          background: Color(0xFFFFFFFF),
+          onBackground: Color(0xFF1B2951),
+
+          // Primary variant colors
+          primaryContainer: Color(0xFF2A3B5C),
+          onPrimaryContainer: Colors.white,
+
+          // Secondary variant colors
+          secondaryContainer: Color(0xFFE0F7FF),
+          onSecondaryContainer: Color(0xFF003544),
+
+          // Tertiary variant colors
+          tertiaryContainer: Color(0xFFE0F9F3),
+          onTertiaryContainer: Color(0xFF002117),
+
+          // Error colors
+          error: Color(0xFFBA1A1A),
+          onError: Colors.white,
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF1B2951),
+          foregroundColor: Colors.white,
+          elevation: 2,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF00A8CC),
+            foregroundColor: Colors.white,
+            elevation: 2,
+          ),
+        ),
+        cardTheme: CardThemeData(
+          color: Colors.white,
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: Color(0xFFE0E0E0), width: 1),
+          ),
+        ),
       ),
-      home: const HomeScreen(),
+      home: const SplashScreen(),
     );
   }
 }

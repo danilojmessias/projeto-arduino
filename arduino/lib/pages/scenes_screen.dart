@@ -1,37 +1,40 @@
-import 'package:arduino/widgets/device_card.dart';
-import 'package:arduino/models/device.dart';
-import 'package:arduino/services/device_service.dart';
 import 'package:flutter/material.dart';
+import '../models/scene.dart';
+import '../models/device.dart';
+import '../services/scene_service.dart';
+import '../widgets/scene_card.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class ScenesScreen extends StatefulWidget {
+  const ScenesScreen({super.key, required this.device});
+
+  final Device device;
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<ScenesScreen> createState() => _ScenesScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  List<Device> devices = [];
+class _ScenesScreenState extends State<ScenesScreen> {
+  List<Scene> scenes = [];
   bool isLoading = true;
   String? errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _loadDevices();
+    _loadScenes();
   }
 
-  Future<void> _loadDevices() async {
+  Future<void> _loadScenes() async {
     try {
       setState(() {
         isLoading = true;
         errorMessage = null;
       });
 
-      final fetchedDevices = await DeviceService.getDevices();
+      final fetchedScenes = await SceneService.getScenes(widget.device.id);
 
       setState(() {
-        devices = fetchedDevices;
+        scenes = fetchedScenes;
         isLoading = false;
       });
     } catch (e) {
@@ -51,17 +54,21 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/logo.jpeg',
-              width: 28,
-              height: 28,
-
-              colorBlendMode: BlendMode.srcIn,
+            Icon(
+              Icons.ac_unit,
+              color: Theme.of(context).colorScheme.secondary,
+              size: 28,
             ),
             const SizedBox(width: 12),
-            const Text(
-              "Voltrix Tech",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            Expanded(
+              child: Text(
+                "Cenas - ${widget.device.name}",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),
@@ -72,15 +79,75 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            // Device info card
+            Card(
+              margin: const EdgeInsets.only(bottom: 16.0),
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0),
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                  width: 1,
+                ),
+              ),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12.0),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                      Theme.of(context).colorScheme.secondary.withOpacity(0.02),
+                    ],
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.computer_outlined,
+                      size: 24,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.device.name,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                          Text(
+                            'IP: ${widget.device.ip}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontFamily: 'monospace',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             // Content area
             Expanded(child: _buildContent()),
-            // Add device button at the bottom
+            // Refresh button at the bottom
             Padding(
               padding: const EdgeInsets.only(bottom: 16.0),
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () => _loadDevices(),
+                  onPressed: () => _loadScenes(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.secondary,
                     foregroundColor: Colors.white,
@@ -92,7 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   icon: const Icon(Icons.refresh),
                   label: const Text(
-                    "Buscar Dispositivos",
+                    "Atualizar Cenas",
                     style: TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -121,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Erro ao carregar dispositivos',
+              'Erro ao carregar cenas',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurface,
               ),
@@ -136,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
-              onPressed: _loadDevices,
+              onPressed: _loadScenes,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.tertiary,
                 foregroundColor: Colors.white,
@@ -149,26 +216,26 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    if (devices.isEmpty) {
+    if (scenes.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.devices_other,
+              Icons.movie_outlined,
               size: 64,
               color: Theme.of(context).colorScheme.secondary.withOpacity(0.6),
             ),
             const SizedBox(height: 16),
             Text(
-              'Nenhum dispositivo encontrado',
+              'Nenhuma cena encontrada',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Pesquise novamente dispositivos na rede',
+              'Este dispositivo não possui cenas configuradas',
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade600),
@@ -179,9 +246,9 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return ListView.builder(
-      itemCount: devices.length,
+      itemCount: scenes.length,
       itemBuilder: (context, index) {
-        return DeviceCard(device: devices[index]);
+        return SceneCard(scene: scenes[index]);
       },
     );
   }
